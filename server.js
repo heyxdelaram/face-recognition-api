@@ -1,7 +1,16 @@
 const express = require("express");
 const bcrypt = require("bcrypt-nodejs")
 const cors = require("cors")
-
+const knex = require("knex")({
+    client: 'mysql',
+    connection: {
+      host : '127.0.0.1',
+      port : 3306,
+      user : 'root',
+      password : '1073',
+      database : 'facerec'
+    }
+});
 
 const app = express();
 
@@ -59,17 +68,17 @@ app.post("/login", (req, res) => {
 app.post("/signup", (req, res) => {
     const { email, password, username } = req.body;
     if(email !== "" && password !== "" && username !== ""){
-        database.users.push({
-            id: "125",
+        knex("users")
+        // .returning("*")
+        .insert({
             username: username,
             email: email,
-            password: password,
-            entries: 0,
             date: new Date()
+        }).then(user => {
+            res.json(knex(user))
+            // res.json(knex('users').where('id', user[0]))
         })
-        res.json(database.users[database.users.length - 1])
-    }else{
-        res.json("invalid")
+        .catch(err => res.status(400).json(err))
     }
 })
 
